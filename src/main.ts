@@ -7,7 +7,13 @@ const cart: CartItem[] = [
 		burgerId: 'abq23',
 		burgerName: 'Arrayburgare',
 		burgerPrice: 125,
-		count: 1
+		count: 0
+	},
+	{
+		burgerId: 'oto32',
+		burgerName: 'Objektburgare',
+		burgerPrice: 135,
+		count: 0
 	}
 ]
 
@@ -17,25 +23,66 @@ function renderCart(): void {
 	// Det är inte garanterat att .cart-items hittar något element!
 	const cartItemsDiv: HTMLDivElement | null = document.querySelector('.cart-items')
 	// cartItems kan vara null, ifall querySelector inte hittar den - uteslut möjligheten med hjälp av if-sats
+	// samma sak med .total-sum
 	if( cartItemsDiv === null ) {
 		return
+	}
+	renderSum()
+
+	function renderSum(): void {
+		const sumPara: HTMLParagraphElement | null = document.querySelector('.total-sum')
+		if( !sumPara ) { return }
+
+		let totalSum: number = 0
+		cart.forEach(item => {
+			totalSum += item.count * item.burgerPrice
+		})
+		sumPara.innerText = `Summa: ${totalSum} kr`
+
 	}
 
 	cart.forEach(item => {
 		const div: HTMLDivElement = document.createElement('div')
+
 		div.innerHTML = `
 			<h3> Burger name </h3>
 			<p class="price-tag"> ?? kr </p>
-			<p class="count"> ? beställa </p>
+			<p class="count"> Antal: ? </p>
 			<button class="add"> +Fler </button>
 			<button class="remove"> -Färre </button>
 		`
+		div.className = 'item'
+
+		const add: HTMLButtonElement = div.querySelector<HTMLButtonElement>('.add')!
+		const remove: HTMLButtonElement = div.querySelector<HTMLButtonElement>('.remove')!
+
 		// Eftersom vi skapar h3-elementet här, är det ok att använda "!"
 		div.querySelector('h3')!.innerText = item.burgerName
 		// console.log('Finns elementet?', div.querySelector<HTMLParagraphElement>('.price-tag'))
 		div.querySelector<HTMLParagraphElement>('.price-tag')!.innerText = `${item.burgerPrice} kr`
+		renderCount()
+
+
+		function renderCount(): void {
+			const pCount: HTMLParagraphElement = div.querySelector<HTMLParagraphElement>('.count')!
+			pCount.innerText = `Antal: ${item.count}`
+		}
+
+		add.addEventListener('click', () => {
+			item.count++
+			renderCount()
+			renderSum()
+		})
+		remove.addEventListener('click', () => {
+			if( item.count > 0 ) {
+				item.count--
+				renderCount()
+				renderSum()
+			}
+		})
 
 		cartItemsDiv.append(div)
+
 	})
 
 }
